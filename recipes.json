@@ -1,0 +1,100 @@
+{
+  "recipes": [
+    {
+      "title": "Scrambled Eggs",
+      "steps": [
+        "Crack eggs into a bowl and whisk until smooth.",
+        "Melt butter in a pan over medium heat.",
+        "Pour eggs into the pan and stir gently until curds form.",
+        "Remove from heat while slightly runny; season with salt and pepper."
+      ],
+      "clarifications": [
+        "Tip: Whisk until the yolks and whites are fully combined.",
+        "Tip: Use medium heat so the butter doesn’t burn.",
+        "Tip: Stir slowly for soft curds instead of dry eggs.",
+        "Tip: Remove slightly early; eggs will keep cooking off heat."
+      ],
+      "ingredients": ["2 eggs", "1 tbsp butter", "Salt", "Pepper"]
+    },
+    {
+      "title": "Grilled Cheese",
+      "steps": [
+        "Butter one side of two slices of bread.",
+        "Place cheese between the slices, buttered side out.",
+        "Heat a skillet over medium heat.",
+        "Cook until golden brown on both sides and cheese is melted."
+      ],
+      "clarifications": [
+        "Tip: Use room-temperature butter for easier spreading.",
+        "Tip: Cheddar or American cheese melts best.",
+        "Tip: Press lightly with a spatula for even browning.",
+        "Tip: Lower heat if bread browns too fast."
+      ],
+      "ingredients": ["2 slices bread", "2 slices cheese", "Butter"]
+    },
+    {
+      "title": "Peanut Butter Sandwich",
+      "steps": [
+        "Lay two slices of bread on a plate.",
+        "Spread peanut butter on one slice of bread.",
+        "Spread jelly on the other slice of bread if desired.",
+        "Press the slices together and cut in half."
+      ],
+      "clarifications": [
+        "Tip: Use smooth peanut butter for easier spreading.",
+        "Tip: Strawberry or grape jelly are classic choices.",
+        "Tip: A butter knife works best for spreading evenly.",
+        "Tip: Cutting diagonally makes it easier to eat."
+      ],
+      "ingredients": ["2 slices bread", "2 tbsp peanut butter", "1 tbsp jelly (optional)"]
+    },
+    {
+      "title": "Oatmeal",
+      "steps": [
+        "Bring water or milk to a boil in a small pot.",
+        "Add oats and reduce heat to medium.",
+        "Cook while stirring occasionally until thick and creamy.",
+        "Serve hot and add toppings of your choice."
+      ],
+      "clarifications": [
+        "Tip: Use a 2-to-1 ratio of liquid to oats for creamier texture.",
+        "Tip: Stir frequently to prevent sticking.",
+        "Tip: Instant oats cook faster but are softer in texture.",
+        "Tip: Common toppings include fruit, nuts, and honey."
+      ],
+      "ingredients": ["1 cup oats", "2 cups water or milk", "Pinch of salt", "Optional toppings"]
+    },
+    {
+      "title": "Fruit Salad",
+      "steps": [
+        "Wash all fruits thoroughly under running water.",
+        "Cut fruits into bite-sized pieces and place in a bowl.",
+        "Mix fruits gently with a spoon.",
+        "Optional: Add a drizzle of honey or squeeze of lemon juice."
+      ],
+      "clarifications": [
+        "Tip: Use at least three types of fruit for variety.",
+        "Tip: Removing seeds makes the salad easier to eat.",
+        "Tip: A splash of lemon juice keeps fruits from browning.",
+        "Tip: Chill before serving for better taste."
+      ],
+      "ingredients": ["1 apple", "1 banana", "1 cup grapes", "1 orange", "Optional: honey or lemon juice"]
+    },
+    {
+      "title": "Pasta with Tomato Sauce",
+      "steps": [
+        "Bring a pot of salted water to a boil.",
+        "Add pasta and cook until tender, stirring occasionally.",
+        "Drain pasta and return to the pot.",
+        "Pour tomato sauce over pasta and mix well before serving."
+      ],
+      "clarifications": [
+        "Tip: Use about 1 teaspoon of salt per quart of water.",
+        "Tip: Stir pasta in the first minute to prevent sticking.",
+        "Tip: Save a little pasta water to thin the sauce if needed.",
+        "Tip: Top with grated cheese for extra flavor."
+      ],
+      "ingredients": ["2 cups pasta", "1 jar tomato sauce", "1 tbsp olive oil", "Salt", "Grated cheese (optional)"]
+    }
+  ]
+}
