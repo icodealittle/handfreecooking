@@ -75,7 +75,8 @@ class RecipeManager:
         prompt = f"""
             Give a helpful cooking tip for this step: "{step_text}". Return only one short tip starting with "Tip:".
             """
-            
+           
+        #GPT fallback    
         try:
             response = self.client.chat.completions.create(
                     model="gpt-4.1-mini", messages=[{"role": "system", "content": "You are a cooking assistant that provides helpful cooking tips."},

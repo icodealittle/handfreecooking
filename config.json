@@ -1,0 +1,6 @@
+{
+  "wake_word": "hey chef",
+  "voice": "alloy",
+  "command_timeout": 10,
+  "mode": "hybrid"
+}

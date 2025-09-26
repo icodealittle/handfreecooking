@@ -95,6 +95,85 @@
         "Tip: Top with grated cheese for extra flavor."
       ],
       "ingredients": ["2 cups pasta", "1 jar tomato sauce", "1 tbsp olive oil", "Salt", "Grated cheese (optional)"]
+    },
+    {
+      "title": "Smoothie",
+      "steps": [
+        "Gather your choice of fruits, yogurt, and a liquid base.",
+        "Place all ingredients into a blender.",
+        "Blend until smooth and creamy.",
+        "Pour into a glass and enjoy immediately."
+      ],
+      "clarifications": [
+        "Tip: Use frozen fruits for a thicker texture.",
+        "Tip: Greek yogurt adds protein and creaminess.",
+        "Tip: Add a handful of spinach for extra nutrients without altering taste.",
+        "Tip: Adjust the liquid amount to reach your desired consistency."
+      ],
+      "ingredients": ["1 cup mixed fruits", "1/2 cup yogurt", "1/2 cup milk or juice", "Optional: honey or spinach"]
+    },
+    {
+      "title": "Tuna Salad",
+      "steps": [
+        "Open the can of tuna and drain the liquid.",
+        "In a bowl, mix tuna with mayonnaise and diced celery.",
+        "Serve the salad with a side of croutons or a drizzle of mustard oil."
+        ],
+      "clarifications": [
+        "Tip: Use a can of tuna that has a 2-3% salt content.",
+        "Tip: Add a splash of mustard oil for added flavor.",
+        "Tip: Dice celery for a more even salad.",
+        "Tip: If using tuna from a frozen can, thaw it before using."
+      ],
+      "ingredients": ["1 can tuna", "1 tbsp mayonnaise", "1 cup diced celery"]
+    },
+    {
+      "title": "Yogurt Parfait",
+      "steps": [
+        "In a glass or bowl, layer yogurt, granola, and fresh fruit.",
+        "Repeat layers until the container is full.",
+        "Top with a drizzle of honey if desired.",
+        "Serve immediately or chill for later."
+      ],
+      "clarifications": [
+        "Tip: Use Greek yogurt for a thicker texture.",
+        "Tip: Fresh berries work well for layering.",
+        "Tip: Granola adds a nice crunch to the parfait.",
+        "Tip: Drizzle honey on top for added sweetness."
+      ],
+      "ingredients": ["1 cup yogurt", "1/2 cup granola", "1/2 cup fresh fruit", "Optional: honey"]
+    },
+    {
+      "title": "Avocado Toast",
+      "steps": [
+        "Toast a slice of bread to your desired level of crispiness.",
+        "Cut an avocado in half, remove the pit, and scoop the flesh into a bowl.",
+        "Mash the avocado with a fork and season with salt and pepper.",
+        "Spread the mashed avocado onto the toasted bread and serve."
+      ],
+      "clarifications": [
+        "Tip: Use ripe avocados for easier mashing.",
+        "Tip: Add a squeeze of lemon juice to prevent browning.",
+        "Tip: Sprinkle red pepper flakes for a spicy kick.",
+        "Tip: Top with a poached egg for extra protein."
+      ],
+      "ingredients": ["1 slice bread", "1 ripe avocado", "Salt", "Pepper", "Optional: lemon juice, red pepper flakes, poached egg"]
+    },
+    {
+      "title": "Caprese Salad",
+      "steps": [
+        "Slice fresh tomatoes and mozzarella cheese into even rounds.",
+        "Arrange tomato and mozzarella slices alternately on a plate.",
+        "Tuck fresh basil leaves between the slices.",
+        "Drizzle with olive oil and balsamic vinegar, then season with salt and pepper."
+      ],
+      "clarifications": [
+        "Tip: Use ripe, in-season tomatoes for the best flavor.",
+        "Tip: Fresh mozzarella is softer and more flavorful than pre-packaged.",
+        "Tip: Tear basil leaves for a more rustic look.",
+        "Tip: Let the salad sit for a few minutes to allow flavors to meld."
+      ],
+      "ingredients": ["2 large tomatoes", "8 oz fresh mozzarella", "Fresh basil leaves", "2 tbsp olive oil", "1 tbsp balsamic vinegar", "Salt", "Pepper"]
     }
   ]
 }
