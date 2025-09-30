@@ -44,5 +44,30 @@ class VoiceManagerLocal:
         while True:
             text = self.listen(prompt = "Say activation phrase...")
             
+            if text and self.wake_word in text:
+                print(f"Wake word detected!")
+                self.speak("Yes, how can I help?")
+                
+                command_text = self.listen(prompt = "Say your command...")
+                
+                if command_text:
+                    return self.parse_command(command_text)
+                else:
+                    self.speak("I didn't catch that. Please try again.")
+                    return "unknown"
+                
+    def parse_command(self, text: str):
+        if "next" in text:
+            return "next"
+        elif "repeat" in text:
+            return "repeat"
+        elif "clarify" in text or "tip" in text:
+            return "clarify"
+        elif "step" in text:
+            return "step"
+        elif "all" in text:
+            return "switch_all"
+        else:
+            return "unknown"
             #TODO: finish this logic to handle multiple wake words and commands
             
