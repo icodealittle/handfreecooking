@@ -1,7 +1,6 @@
 import tkinter as tk
 import threading
 from recipe_manager import RecipeManager
-from voice_manager_gpt import VoiceManagerGPT
 from cooking_session import CookingSession
 from ui_manager import UIManager
 from utils import log_event, load_config
