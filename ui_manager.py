@@ -188,39 +188,45 @@
 # Version 3:
 import tkinter as tk
 from tkinter import ttk
+import threading
 from utils import log_event
 
 
 class UIManager:
+    """Handles all GUI operations for the Hand-Free Cooking Assistant."""
+
     def __init__(self, root, recipe_manager, session):
         self.root = root
         self.recipe_manager = recipe_manager
         self.session = session
 
-        root.title("Hand-free Cooking Assistant")
+        # Window setup
+        root.title("👩‍🍳 Hand-Free Cooking Assistant")
         root.geometry("820x620")
 
         self.app_title = tk.Label(
-            root, text="👩‍🍳 Hand-free Cooking", font=("Arial", 20, "bold")
+            root, text="👩‍🍳 Hand-Free Cooking", font=("Arial", 20, "bold")
         )
         self.app_title.pack(pady=10)
 
-        # status
+        # Status label
         self.status_label = tk.Label(root, text="Ready", fg="gray")
         self.status_label.pack()
 
-        # recipe picker
+        # Recipe dropdown
         self.recipe_var = tk.StringVar(root)
-        titles = [r["title"] for r in recipe_manager.recipes]
         self.recipe_dropdown = ttk.Combobox(
-            root, textvariable=self.recipe_var, values=titles, state="readonly"
+            root, textvariable=self.recipe_var, state="readonly"
         )
         self.recipe_dropdown.set("Select Recipe")
         self.recipe_dropdown.bind(
             "<<ComboboxSelected>>", self.load_recipe_from_dropdown
         )
-        self.recipe_dropdown.pack()
+        self.recipe_dropdown.pack(pady=5)
 
+        self.refresh_recipe_dropdown()  # load titles initially
+
+        # Recipe info
         self.recipe_title = tk.Label(root, text="", font=("Arial", 18, "bold"))
         self.recipe_title.pack(pady=10)
 
@@ -232,6 +238,7 @@ class UIManager:
         )
         self.step_label.pack(pady=10)
 
+        # Control buttons
         controls = tk.Frame(root)
         controls.pack(pady=10)
 
@@ -248,14 +255,25 @@ class UIManager:
             row=0, column=3, padx=5
         )
         tk.Button(
-            controls, text="🛠 Calibrate my voice", command=self.calibrate_voice
+            controls, text="🛠 Calibrate Voice", command=self.calibrate_voice
         ).grid(row=0, column=4, padx=5)
 
+    # --------------------------
+    # UI Utility methods
+    # --------------------------
     def set_status(self, text, color="gray"):
+        """Update status label safely."""
         self.status_label.config(text=text, fg=color)
         self.root.update_idletasks()
 
+    def refresh_recipe_dropdown(self):
+        """Populate dropdown with all recipe titles."""
+        titles = [r["title"] for r in self.recipe_manager.recipes]
+        self.recipe_dropdown["values"] = titles
+        self.root.update_idletasks()
+
     def refresh_loaded_recipe(self):
+        """Update UI with the current recipe details."""
         recipe = self.recipe_manager.current
         if recipe:
             self.recipe_title.config(text=recipe["title"])
@@ -264,18 +282,58 @@ class UIManager:
                 self.recipe_image_label.config(image=img)
                 self.recipe_image_label.image = img
 
+    # --------------------------
+    # Event handlers
+    # --------------------------
     def load_recipe_from_dropdown(self, _):
+        """Handle recipe selection asynchronously to prevent UI freezing."""
         title = self.recipe_var.get()
-        recipe = self.recipe_manager.select_by_title(title)
-        if recipe:
-            log_event(f"Recipe loaded: {recipe['title']}")
-            self.refresh_loaded_recipe()
-            self.step_label.config(text="Recipe loaded. Say 'start' or press ▶️ Start.")
+        self.set_status("Loading recipe…", "orange")
+        self.step_label.config(text=f"Loading {title}… please wait.", fg="gray")
 
+        def background_load():
+            try:
+                recipe = self.recipe_manager.select_by_title(title)
+                if not recipe:
+                    return
+
+                # Safe UI updates
+                self.root.after(0, self.refresh_loaded_recipe)
+                self.root.after(
+                    0,
+                    lambda: self.step_label.config(
+                        text=f"✅ {recipe['title']} loaded.\nSay 'start' or press ▶️ Start.",
+                        fg="green",
+                    ),
+                )
+                self.root.after(0, lambda: self.set_status("Recipe ready", "green"))
+                log_event(f"Recipe loaded: {recipe['title']}")
+                self.session.voice_manager.speak(f"{recipe['title']} loaded and ready.")
+            except Exception as e:
+                print(f"[ERROR] Failed to load recipe: {e}")
+                self.root.after(
+                    0,
+                    lambda: self.step_label.config(
+                        text=f"⚠️ Failed to load {title}. Please try again.", fg="red"
+                    ),
+                )
+            finally:
+                self.root.after(0, lambda: self.set_status("Ready", "gray"))
+
+        # Run background task
+        threading.Thread(target=background_load, daemon=True).start()
+
+    # --------------------------
+    # Cooking controls
+    # --------------------------
     def start(self, mode="step"):
+        """Start cooking steps or full recipe."""
         if not self.recipe_manager.current:
-            self.step_label.config(text="⚠️ Please select a recipe first.")
+            self.step_label.config(text="⚠️ Please select a recipe first.", fg="red")
+            self.session.voice_manager.speak("Please select a recipe first.")
             return
+
+        self.step_label.config(fg="black")
         out = self.session.start(mode)
         self.step_label.config(text=out if isinstance(out, str) else "\n".join(out))
 
@@ -289,6 +347,7 @@ class UIManager:
         self.step_label.config(text=self.session.clarify_step())
 
     def calibrate_voice(self):
+        """Run short microphone calibration."""
         self.set_status("Calibrating…", "orange")
         try:
             self.session.voice_manager.calibrate(seconds=2)

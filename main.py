@@ -141,9 +141,133 @@
 # main()
 
 # Version 3:
-import tkinter as tk
-import threading
-import re
+# import tkinter as tk
+# import threading
+# import re
+
+# from recipe_manager import RecipeManager
+# from cooking_session import CookingSession
+# from ui_manager import UIManager
+# from utils import load_config
+# from voice_manager_gpt import VoiceManagerGPT
+# from voice_manager_local import VoiceManagerLocal
+
+
+# def normalize(s):
+#     return re.sub(r"[^a-z0-9 ]+", "", s.lower()).strip()
+
+
+# def match_recipe_title(text, titles):
+#     t = normalize(text)
+#     for title in titles:
+#         nt = normalize(title)
+#         if t == nt or t in nt or nt in t:
+#             return title
+#     return None
+
+
+# def handle_voice_commands(root, ui, recipe_manager, session, voice_manager):
+#     TITLES = [r["title"] for r in recipe_manager.recipes]
+
+#     def set_ui(text, color="gray"):
+#         root.after(0, lambda: ui.set_status(text, color))
+
+#     def set_step(text):
+#         root.after(0, lambda: ui.step_label.config(text=text))
+
+#     while True:
+#         set_ui("Listening for wake word…", "green")
+#         cmd = voice_manager.wait_for_wake_word()
+#         set_ui("Processing…", "orange")
+#         print("Command received:", cmd)
+
+#         if cmd in {"start", "next", "repeat", "clarify", "switch_step", "switch_all"}:
+#             if cmd == "start":
+#                 out = session.start("step")
+#                 set_step(out if isinstance(out, str) else "\n".join(out))
+#             elif cmd == "next":
+#                 set_step(session.next_step())
+#             elif cmd == "repeat":
+#                 set_step(session.repeat_step())
+#             elif cmd == "clarify":
+#                 set_step(session.clarify_step())
+#             elif cmd == "switch_step":
+#                 set_step(session.start("step"))
+#             elif cmd == "switch_all":
+#                 out = session.start("all")
+#                 set_step(out if isinstance(out, str) else "\n".join(out))
+#             set_ui("Ready", "gray")
+#             continue
+
+#         title = match_recipe_title(cmd, TITLES)
+#         if title:
+#             recipe_manager.select_by_title(title)
+#             root.after(0, ui.refresh_loaded_recipe)
+#             voice_manager.speak(f"Loaded {title}. Say start when you're ready.")
+#             set_step(f"🍳 Recipe selected: {title}\nSay 'start' or press ▶️ Start.")
+#             set_ui("Ready", "gray")
+#             continue
+
+#         voice_manager.speak(
+#             "Sorry, I didn't catch that. Say a recipe name, or say start, next, repeat, or clarify."
+#         )
+#         set_step("❓ Try: 'Scrambled Eggs', 'Start', 'Next', 'Repeat', or 'Clarify'.")
+#         set_ui("Ready", "gray")
+
+
+# def main():
+#     cfg = load_config()
+#     root = tk.Tk()
+#     root.withdraw()
+
+#     recipe_manager = RecipeManager("recipes.json", api_key=cfg.get("openai_api_key"))
+
+#     # ✅ Get API key safely
+#     openai_api_key = cfg.get("openai_api_key") or os.getenv("OPENAI_API_KEY")
+
+#     # ✅ Default to GPT if mode not specified
+#     mode = cfg.get("mode", "gpt").lower()
+
+#     # ✅ Gracefully handle GPT vs Local mode
+#     if mode in ["gpt", "hybrid"] and openai_api_key:
+#         print("🔊 Using GPT-powered voice assistant")
+#         vm = VoiceManagerGPT(
+#             api_key=openai_api_key,
+#             voice=cfg.get("voice", "alloy"),
+#             wake_word=cfg.get("wake_word", "hey chef"),
+#             command_timeout=cfg.get("command_timeout", 10),
+#             config=cfg,
+#         )
+#     else:
+#         if not openai_api_key:
+#             print("⚠️ No OpenAI API key found. Falling back to LOCAL mode.")
+#         else:
+#             print("🔊 Using LOCAL voice assistant")
+
+#         vm = VoiceManagerLocal(
+#             wake_word=cfg.get("wake_word", "hey chef"),
+#             command_timeout=cfg.get("command_timeout", 10),
+#         )
+
+#     # ✅ Initialize the cooking session and UI
+#     session = CookingSession(recipe_manager, vm)
+#     ui = UIManager(root, recipe_manager, session)
+
+#     # ✅ Run voice assistant in a background thread
+#     threading.Thread(
+#         target=handle_voice_commands,
+#         args=(root, ui, recipe_manager, session, vm),
+#         daemon=True,
+#     ).start()
+
+#     root.deiconify()
+#     root.mainloop()
+
+# if __name__ == "__main__":
+#     main()
+
+import tkinter as tk, threading, re, os
+from difflib import get_close_matches
 
 from recipe_manager import RecipeManager
 from cooking_session import CookingSession
@@ -154,21 +278,24 @@ from voice_manager_local import VoiceManagerLocal
 
 
 def normalize(s):
-    return re.sub(r"[^a-z0-9 ]+", "", s.lower()).strip()
+    return re.sub(r"[^a-z0-9 ]+", "", (s or "").lower()).strip()
 
 
 def match_recipe_title(text, titles):
     t = normalize(text)
-    for title in titles:
-        nt = normalize(title)
-        if t == nt or t in nt or nt in t:
-            return title
-    return None
+    if not t:
+        return None
+    normalized = {normalize(tt): tt for tt in titles}
+    # try direct contains
+    for k, original in normalized.items():
+        if t == k or t in k or k in t:
+            return original
+    # fuzzy
+    close = get_close_matches(t, list(normalized.keys()), n=1, cutoff=0.55)
+    return normalized[close[0]] if close else None
 
 
 def handle_voice_commands(root, ui, recipe_manager, session, voice_manager):
-    TITLES = [r["title"] for r in recipe_manager.recipes]
-
     def set_ui(text, color="gray"):
         root.after(0, lambda: ui.set_status(text, color))
 
@@ -181,7 +308,14 @@ def handle_voice_commands(root, ui, recipe_manager, session, voice_manager):
         set_ui("Processing…", "orange")
         print("Command received:", cmd)
 
+        # Flow commands
         if cmd in {"start", "next", "repeat", "clarify", "switch_step", "switch_all"}:
+            if not recipe_manager.current and cmd != "start":
+                voice_manager.speak("Please select a recipe first.")
+                set_step("⚠️ Please select a recipe first.")
+                set_ui("Ready", "gray")
+                continue
+
             if cmd == "start":
                 out = session.start("step")
                 set_step(out if isinstance(out, str) else "\n".join(out))
@@ -199,19 +333,30 @@ def handle_voice_commands(root, ui, recipe_manager, session, voice_manager):
             set_ui("Ready", "gray")
             continue
 
-        title = match_recipe_title(cmd, TITLES)
+        # Try to load by voice title
+        titles = recipe_manager.get_titles()
+        title = match_recipe_title(cmd, titles)
         if title:
-            recipe_manager.select_by_title(title)
-            root.after(0, ui.refresh_loaded_recipe)
-            voice_manager.speak(f"Loaded {title}. Say start when you're ready.")
-            set_step(f"🍳 Recipe selected: {title}\nSay 'start' or press ▶️ Start.")
-            set_ui("Ready", "gray")
+
+            def bg():
+                recipe = recipe_manager.select_by_title(title)
+                if recipe:
+                    root.after(0, lambda: ui.recipe_var.set(title))
+                    root.after(0, ui.refresh_loaded_recipe)
+                    voice_manager.speak(f"Loaded {title}. Say start when you're ready.")
+                    set_step(
+                        f"🍳 Recipe selected: {title}\nSay 'start' or press ▶️ Start."
+                    )
+                set_ui("Ready", "gray")
+
+            threading.Thread(target=bg, daemon=True).start()
             continue
 
+        # Fallback
         voice_manager.speak(
-            "Sorry, I didn't catch that. Say a recipe name, or say start, next, repeat, or clarify."
+            "Say a recipe name, or say start, next, repeat, or clarify."
         )
-        set_step("❓ Try: 'Scrambled Eggs', 'Start', 'Next', 'Repeat', or 'Clarify'.")
+        set_step("❓ Try: 'Tuna Salad', 'Start', 'Next', 'Repeat', or 'Clarify'.")
         set_ui("Ready", "gray")
 
 
@@ -222,38 +367,33 @@ def main():
 
     recipe_manager = RecipeManager("recipes.json", api_key=cfg.get("openai_api_key"))
 
-    # ✅ Get API key safely
-    openai_api_key = cfg.get("openai_api_key") or os.getenv("OPENAI_API_KEY")
-
-    # ✅ Default to GPT if mode not specified
-    mode = cfg.get("mode", "gpt").lower()
-
-    # ✅ Gracefully handle GPT vs Local mode
-    if mode in ["gpt", "hybrid"] and openai_api_key:
+    api_key = cfg.get("openai_api_key") or os.getenv("OPENAI_API_KEY")
+    mode = (cfg.get("mode") or "gpt").lower()
+    if mode in ["gpt", "hybrid"] and api_key:
         print("🔊 Using GPT-powered voice assistant")
         vm = VoiceManagerGPT(
-            api_key=openai_api_key,
+            api_key=api_key,
             voice=cfg.get("voice", "alloy"),
             wake_word=cfg.get("wake_word", "hey chef"),
             command_timeout=cfg.get("command_timeout", 10),
             config=cfg,
         )
     else:
-        if not openai_api_key:
+        if not api_key:
             print("⚠️ No OpenAI API key found. Falling back to LOCAL mode.")
         else:
             print("🔊 Using LOCAL voice assistant")
+        from voice_manager_local import VoiceManagerLocal
 
         vm = VoiceManagerLocal(
             wake_word=cfg.get("wake_word", "hey chef"),
             command_timeout=cfg.get("command_timeout", 10),
         )
 
-    # ✅ Initialize the cooking session and UI
     session = CookingSession(recipe_manager, vm)
     ui = UIManager(root, recipe_manager, session)
+    ui.refresh_recipe_dropdown()
 
-    # ✅ Run voice assistant in a background thread
     threading.Thread(
         target=handle_voice_commands,
         args=(root, ui, recipe_manager, session, vm),
@@ -262,6 +402,7 @@ def main():
 
     root.deiconify()
     root.mainloop()
+
 
 if __name__ == "__main__":
     main()

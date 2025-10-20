@@ -51,3 +51,8 @@
 [2025-10-06 19:17:53] Already at the last step.
 [2025-10-06 19:17:55] Clarification for step 4: Tip: Adjust the liquid amount to reach your desired consistency.
 [2025-10-20 15:52:45] Cooking started in step mode.
+[2025-10-20 16:18:20] Recipe loaded: Fruit Salad
+[2025-10-20 16:18:23] Step 1: Wash all fruits thoroughly under running water.
+[2025-10-20 16:19:46] Step 1: Wash all fruits thoroughly under running water.
+[2025-10-20 16:23:04] Clarification for step 1: No recipe loaded.
+[2025-10-20 17:03:49] Recipe loaded: Oatmeal

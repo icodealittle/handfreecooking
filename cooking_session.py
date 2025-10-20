@@ -1,64 +1,67 @@
-from utils import log_event
-
-"""Manages the cooking session, including reading steps, handling modes (step-by-step or all-at-once),
-and interacting with the voice manager for TTS output."""
 class CookingSession:
-    def __init__(self, recipe_manager, voice_manager ):
+    """Controls cooking flow & speaks via voice_manager."""
+
+    def __init__(self, recipe_manager, voice_manager):
         self.recipe_manager = recipe_manager
         self.voice_manager = voice_manager
+        self.mode = "step"
         self.current_step = 0
-        self.mode = None
 
-    """Start the cooking session in the specified mode ('step' or 'all')"""
-
+    def _ensure_recipe(self):
+        if not self.recipe_manager.current:
+            self.voice_manager.speak("Please select a recipe first.")
+            return False
+        return True
 
     def start(self, mode="step"):
-        """Start the cooking session."""
-        if not self.recipe_manager.current:
-            # No recipe selected yet
-            self.voice_manager.speak("Please select a recipe first.")
-            print("LOG: No recipe selected. Cannot start cooking.")
-            return (
-                "⚠️ No recipe selected. Please say a recipe name or choose one in the app."
-            )
-
+        if not self._ensure_recipe():
+            return "⚠️ Please select a recipe first."
         self.mode = mode
         self.current_step = 0
-        print(f"LOG: Cooking started in {mode} mode.")
+        return self.read_step() if mode == "step" else self.read_all()
+
+    def read_step(self):
+        if not self._ensure_recipe():
+            return "⚠️ Please select a recipe first."
+        steps = self.recipe_manager.current.get("steps", [])
+        if not steps:
+            return "No steps found for this recipe."
+        step = steps[self.current_step]
+        self.voice_manager.speak(step)
+        return f"Step {self.current_step+1}/{len(steps)}:\n{step}"
+
+    def next_step(self):
+        if not self._ensure_recipe():
+            return "⚠️ Please select a recipe first."
+        steps = self.recipe_manager.current.get("steps", [])
+        if not steps:
+            return "No steps found for this recipe."
+        if self.current_step < len(steps) - 1:
+            self.current_step += 1
         return self.read_step()
 
-    """Read the current step aloud and log it"""
-    def read_step(self):
-        step = self.recipe_manager.current['steps'][self.current_step]
-        text = f"Step {self.current_step + 1}: {step}"
-        log_event(text)
-        self.voice_manager.speak(text)
-        return text
-
-    """Advance to the next step, if available, and read it aloud"""
-    def next_step(self):
-        if self.current_step < len(self.recipe_manager.current['steps']) - 1:
-            self.current_step += 1
-            return self.read_step()
-        else:
-            log_event("Already at the last step.")
-            return "You are already at the last step." 
-
-    """Repeat the current step"""
     def repeat_step(self):
-        return self.read_step()  
+        if not self._ensure_recipe():
+            return "⚠️ Please select a recipe first."
+        return self.read_step()
 
-    """Get a clarification or tip for the current step"""
     def clarify_step(self):
-        tip = self.recipe_manager.get_clarification(self.current_step)
-        log_event(f"Clarification for step {self.current_step + 1}: {tip}")
+        if not self._ensure_recipe():
+            return "⚠️ Please select a recipe first."
+        clar = self.recipe_manager.current.get("clarifications", [])
+        if self.current_step < len(clar) and clar[self.current_step]:
+            tip = clar[self.current_step]
+        else:
+            tip = "Tip: go slow and keep an eye on heat."
         self.voice_manager.speak(tip)
         return tip
 
-    """Read all steps aloud and log them"""
-    def read_all_steps(self):
-        all_steps = self.recipe_manager.current['steps']
-        text = "Here are all the steps:\n" + "\n".join([f"Step {i+1}: {s}" for i, s in enumerate(all_steps)])
-        log_event("Reading all steps.")
-        self.voice_manager.speak(text)
+    def read_all(self):
+        if not self._ensure_recipe():
+            return "⚠️ Please select a recipe first."
+        steps = self.recipe_manager.current.get("steps", [])
+        if not steps:
+            return "No steps found for this recipe."
+        text = "\n".join(f"{i+1}. {s}" for i, s in enumerate(steps))
+        self.voice_manager.speak("Starting recipe. I'll read the steps for you.")
         return text

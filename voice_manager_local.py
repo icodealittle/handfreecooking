@@ -162,74 +162,56 @@
 #                 return parsed if parsed != "unknown" else command_text.lower()
 
 # Version 3:
-import pyttsx3
-import speech_recognition as sr
-from command_utils import normalize_command
+import pyttsx3, speech_recognition as sr
+import numpy as np, time
+
+WAKE_RETRIES = 6
 
 
 class VoiceManagerLocal:
-    """Local TTS/STT with wake word and shared command parsing."""
-
-    def __init__(
-        self, wake_word="hey chef", command_timeout=10, voice=None, mic_duration=5
-    ):
+    def __init__(self, wake_word="hey chef", command_timeout=10, voice=None):
         self.engine = pyttsx3.init()
         self.engine.setProperty("rate", 180)
-        self.engine.setProperty("volume", 1.0)
         if voice:
             for v in self.engine.getProperty("voices"):
                 if voice.lower() in v.name.lower():
                     self.engine.setProperty("voice", v.id)
                     break
-        self.recognizer = sr.Recognizer()
-        self.wake_word = wake_word.lower()
+        self.rec = sr.Recognizer()
+        self.wake_word = (wake_word or "hey chef").lower()
         self.command_timeout = command_timeout
-        self.mic_duration = mic_duration
 
-    def speak(self, text: str):
-        try:
-            self.engine.say(text)
-            self.engine.runAndWait()
-        except Exception as e:
-            print("TTS error:", e)
+    def speak(self, text):
+        self.engine.say(text)
+        self.engine.runAndWait()
 
-    def calibrate(self, seconds: int = 2):
-        """Ambient noise calibration using SpeechRecognition."""
-        try:
-            with sr.Microphone() as source:
-                self.recognizer.adjust_for_ambient_noise(source, duration=seconds)
-            self.speak("Calibration complete.")
-        except Exception as e:
-            print("Calibration error:", e)
-            self.speak("Calibration skipped due to an error.")
+    def calibrate(self, seconds=1.5):
+        with sr.Microphone() as src:
+            self.rec.adjust_for_ambient_noise(src, duration=seconds)
 
-    def listen(self, prompt="Say something", duration=None):
-        dur = duration if duration is not None else self.mic_duration
+    def listen(self, prompt="Say something...", duration=5):
         print(prompt)
-        with sr.Microphone() as source:
+        with sr.Microphone() as src:
             try:
-                self.recognizer.adjust_for_ambient_noise(source, duration=0.5)
-                audio = self.recognizer.listen(
-                    source, timeout=dur, phrase_time_limit=dur
+                self.rec.adjust_for_ambient_noise(src, duration=0.5)
+                audio = self.rec.listen(
+                    src, timeout=duration, phrase_time_limit=duration
                 )
-                text = self.recognizer.recognize_google(audio)
-                text = text.lower().strip()
-                print("🗣️ You said:", text)
-                return text
+                txt = self.rec.recognize_google(audio)
+                return txt.lower().strip()
             except Exception:
                 return None
 
-    def wait_for_wake_and_command(self):
-        print(f"🎙 Waiting for wake word: '{self.wake_word}'")
-        while True:
-            heard = self.listen(prompt="Say activation phrase...", duration=4)
+    def wait_for_wake_word(self):
+        for _ in range(WAKE_RETRIES):
+            heard = self.listen(prompt="Say activation phrase...", duration=3)
             if heard and self.wake_word in heard:
                 self.speak("Yes, how can I help?")
-                cmd_text = self.listen(
+                cmd = self.listen(
                     prompt="Listening for command...", duration=self.command_timeout
                 )
-                if not cmd_text:
-                    self.speak("I didn’t hear a command. Going back to standby.")
-                    return "unknown"
-                parsed = normalize_command(cmd_text)
-                return parsed if parsed != "unknown" else cmd_text.lower()
+                return cmd or "unknown"
+        return "unknown"
+
+    def wait_for_wake_and_command(self):  # alias
+        return self.wait_for_wake_word()

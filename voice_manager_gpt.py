@@ -189,18 +189,17 @@
 #                 return parsed if parsed != "unknown" else command_text.lower()
 
 # Version 3:
-import os
-import tempfile
-import pygame
-import sounddevice as sd
-import scipy.io.wavfile as wav
+import os, tempfile, pygame, sounddevice as sd, scipy.io.wavfile as wav
 from openai import OpenAI
+import numpy as np
+
+WAKE_RETRIES = 6  # more tries to catch wake word
+LISTEN_SECS = 6  # slightly longer window for accents/pace
+ENERGY_MIN = 0.005  # ignore near-silence
 
 
 class VoiceManagerGPT:
-    """Voice Manager that handles speech recognition (STT) and text-to-speech (TTS)
-    using OpenAI's GPT-powered audio models.
-    """
+    """GPT-based STT (Whisper) + TTS with resilient wake word detection."""
 
     def __init__(
         self,
@@ -212,105 +211,85 @@ class VoiceManagerGPT:
     ):
         self.client = OpenAI(api_key=api_key or os.getenv("OPENAI_API_KEY"))
         self.voice = voice
-        self.wake_word = wake_word.lower()
+        self.wake_word = (wake_word or "hey chef").lower()
         self.command_timeout = command_timeout
-        self.stt_model = "whisper-1"
-        self.stt_language = "en"
+        self.stt_model = (config or {}).get("stt_model", "whisper-1")
+        self.stt_language = (config or {}).get("stt_language")  # optional
+        self.mic_duration = (config or {}).get("mic_duration", LISTEN_SECS)
 
-        if config:
-            self.stt_language = config.get("stt_language", "en")
-
-        # ✅ Auto-detect first available input device
         try:
             devices = sd.query_devices()
-            input_devices = [
-                i for i, d in enumerate(devices) if d["max_input_channels"] > 0
+            idxs = [
+                i for i, d in enumerate(devices) if d.get("max_input_channels", 0) > 0
             ]
-            if input_devices:
-                sd.default.device = input_devices[0]
-                print(f"🎤 Using mic: {devices[input_devices[0]]['name']}")
-            else:
-                print("⚠️ No input device found. Falling back to text mode.")
+            if idxs:
+                sd.default.device = (idxs[0], None)
+                print(f"🎤 Using mic: {devices[idxs[0]]['name']}")
         except Exception as e:
-            print("⚠️ Could not query audio devices:", e)
+            print("Mic query error:", e)
 
         pygame.mixer.init()
 
-    # ✅ Text-to-speech
-    def speak(self, text: str):
+    # ---------- TTS ----------
+    def speak(self, text):
         try:
             with self.client.audio.speech.with_streaming_response.create(
                 model="gpt-4o-mini-tts", voice=self.voice, input=text
-            ) as response:
-                tmp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
-                response.stream_to_file(tmp_file.name)
-                pygame.mixer.music.load(tmp_file.name)
+            ) as resp:
+                tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
+                resp.stream_to_file(tmp.name)
+                pygame.mixer.music.load(tmp.name)
                 pygame.mixer.music.play()
                 while pygame.mixer.music.get_busy():
-                    continue
+                    pygame.time.wait(60)
         except Exception as e:
-            print(f"Error in TTS: {e}")
+            print("TTS error:", e)
 
-    # ✅ Speech-to-text
-    def listen(self, prompt="Say something...", duration=5):
+    # ---------- STT ----------
+    def _record(self, seconds):
         fs = 16000
+        data = sd.rec(int(seconds * fs), samplerate=fs, channels=1, dtype="float32")
+        sd.wait()
+        # simple energy gate to avoid sending silence
+        if float(np.mean(np.abs(data))) < ENERGY_MIN:
+            return None, fs
+        return data, fs
+
+    def listen(self, prompt="Say something...", duration=None):
+        dur = duration or self.mic_duration
         print(prompt)
-
         try:
-            recording = sd.rec(
-                int(duration * fs), samplerate=fs, channels=1, dtype="int16"
-            )
-            sd.wait()
+            data, fs = self._record(dur)
+            if data is None:
+                return None
+            tmpwav = tempfile.NamedTemporaryFile(delete=False, suffix=".wav")
+            wav.write(tmpwav.name, fs, (data * 32767.0).astype("int16"))
 
-            tmp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".wav")
-            wav.write(tmp_file.name, fs, recording)
-
-            kwargs = {"model": self.stt_model, "file": open(tmp_file.name, "rb")}
+            kwargs = {"model": self.stt_model, "file": open(tmpwav.name, "rb")}
             if self.stt_language:
-                kwargs["language"] = self.stt_language  # must be ISO-639-1, e.g., "en"
+                kwargs["language"] = self.stt_language  # ISO-639-1; omit for autodetect
 
-            transcript = self.client.audio.transcriptions.create(**kwargs)
-            return transcript.text.lower().strip()
+            tr = self.client.audio.transcriptions.create(**kwargs)
+            text = (tr.text or "").strip().lower()
+            print("🗣️", text)
+            return text if text else None
         except Exception as e:
             print("STT error:", e)
             return None
 
-    # ✅ Wait for wake word, then command
+    # ---------- Wake + command ----------
     def wait_for_wake_word(self):
-        print(f"Waiting for wake word: '{self.wake_word}'")
-        while True:
-            text = self.listen(prompt="Say activation phrase...")
-            if text and self.wake_word in text:
-                print("Wake word detected!")
+        """Try multiple short listens to reliably catch the wake phrase."""
+        for _ in range(WAKE_RETRIES):
+            heard = self.listen(prompt="Say activation phrase...", duration=3)
+            if heard and self.wake_word in heard:
                 self.speak("Yes, how can I help?")
-
-                command_text = self.listen(
+                cmd = self.listen(
                     prompt="Listening for command...", duration=self.command_timeout
                 )
-                if command_text:
-                    return self.parse_command(command_text)
-                else:
-                    self.speak("I didn’t hear a command. Going back to standby.")
-                    return "unknown"
+                return cmd or "unknown"
+        return "unknown"
 
-    # ✅ Command parser via GPT
-    def parse_command(self, text: str):
-        try:
-            response = self.client.chat.completions.create(
-                model="gpt-4.1-mini",
-                messages=[
-                    {
-                        "role": "system",
-                        "content": (
-                            "You are a cooking assistant. "
-                            "Map the user's spoken text to one of: "
-                            "[next, repeat, clarify, grocery, start, stop, switch_step, switch_all, unknown]."
-                        ),
-                    },
-                    {"role": "user", "content": text},
-                ],
-            )
-            return response.choices[0].message.content.strip().lower()
-        except Exception as e:
-            print("Parse error:", e)
-            return "unknown"
+    # Back-compat thread calls the new name:
+    def wait_for_wake_and_command(self):
+        return self.wait_for_wake_word()
