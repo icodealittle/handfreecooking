@@ -20,6 +20,8 @@ class RecipeManager:
         
         self.current = None
         
+    def get_titles(self):
+        return [recipe['title'] for recipe in self.recipes]
         """Select recipe by title form local JSON
         """
     def select_by_title(self, title):
@@ -43,7 +45,7 @@ class RecipeManager:
             "title": "...",
             "ingredients": ["..."],
             "steps": ["..."],
-            "clarificatoin": ["Tip:....", "Tip:..."]
+            "clarificatoins": ["Tip:....", "Tip:..."]
             }}
             """
         response = self.client.chat.completions.create(

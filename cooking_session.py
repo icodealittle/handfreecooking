@@ -8,25 +8,33 @@ class CookingSession:
         self.voice_manager = voice_manager
         self.current_step = 0
         self.mode = None
-    
+
     """Start the cooking session in the specified mode ('step' or 'all')"""
+
+
     def start(self, mode="step"):
+        """Start the cooking session."""
+        if not self.recipe_manager.current:
+            # No recipe selected yet
+            self.voice_manager.speak("Please select a recipe first.")
+            print("LOG: No recipe selected. Cannot start cooking.")
+            return (
+                "⚠️ No recipe selected. Please say a recipe name or choose one in the app."
+            )
+
         self.mode = mode
         self.current_step = 0
-        log_event(f"Cooking started in {mode} mode.")
-        if mode == 'step':
-            return self.read_step()
-        else:
-            return self.read_all_steps()
-    
+        print(f"LOG: Cooking started in {mode} mode.")
+        return self.read_step()
+
     """Read the current step aloud and log it"""
     def read_step(self):
-        step = self.recipe_manager.current['step'][self.current_step]
+        step = self.recipe_manager.current['steps'][self.current_step]
         text = f"Step {self.current_step + 1}: {step}"
         log_event(text)
         self.voice_manager.speak(text)
         return text
-    
+
     """Advance to the next step, if available, and read it aloud"""
     def next_step(self):
         if self.current_step < len(self.recipe_manager.current['steps']) - 1:
@@ -35,18 +43,18 @@ class CookingSession:
         else:
             log_event("Already at the last step.")
             return "You are already at the last step." 
-    
+
     """Repeat the current step"""
     def repeat_step(self):
         return self.read_step()  
-    
+
     """Get a clarification or tip for the current step"""
     def clarify_step(self):
         tip = self.recipe_manager.get_clarification(self.current_step)
         log_event(f"Clarification for step {self.current_step + 1}: {tip}")
         self.voice_manager.speak(tip)
         return tip
-    
+
     """Read all steps aloud and log them"""
     def read_all_steps(self):
         all_steps = self.recipe_manager.current['steps']

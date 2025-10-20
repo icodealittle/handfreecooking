@@ -1,0 +1,53 @@
+[2025-09-30 09:05:33] Cooking started in step mode.
+[2025-10-01 09:06:37] Recipe loaded: Grilled Cheese
+[2025-10-01 09:07:50] Clarification for step 1: Tip: Use room-temperature butter for easier spreading.
+[2025-10-01 09:19:25] Clarification for step 1: No recipe loaded.
+[2025-10-01 09:20:01] Recipe loaded: Scrambled Eggs
+[2025-10-01 09:20:50] Clarification for step 1: Tip: Whisk until the yolks and whites are fully combined.
+[2025-10-01 10:46:32] Clarification for step 1: No recipe loaded.
+[2025-10-01 10:47:57] Clarification for step 1: No recipe loaded.
+[2025-10-01 11:01:22] Clarification for step 1: Tip: Use a 2-to-1 ratio of liquid to oats for creamier texture.
+[2025-10-01 11:01:40] Step 2: Add oats and reduce heat to medium.
+[2025-10-01 11:01:47] Step 3: Cook while stirring occasionally until thick and creamy.
+[2025-10-01 11:02:08] Clarification for step 3: Tip: Instant oats cook faster but are softer in texture.
+[2025-10-01 12:34:38] Cooking started in step mode.
+[2025-10-01 12:34:38] Step 1: Bring a pot of salted water to a boil.
+[2025-10-01 12:34:45] Step 2: Add pasta and cook until tender, stirring occasionally.
+[2025-10-01 12:34:53] Step 3: Drain pasta and return to the pot.
+[2025-10-01 12:34:59] Clarification for step 3: Tip: Save a little pasta water to thin the sauce if needed.
+[2025-10-01 12:35:05] Step 4: Pour tomato sauce over pasta and mix well before serving.
+[2025-10-01 12:35:13] Already at the last step.
+[2025-10-01 12:35:16] Step 4: Pour tomato sauce over pasta and mix well before serving.
+[2025-10-06 18:58:02] Step 2: Melt butter in a pan over medium heat.
+[2025-10-06 18:58:39] Cooking started in step mode.
+[2025-10-06 18:58:39] Step 1: Crack eggs into a bowl and whisk until smooth.
+[2025-10-06 18:58:47] Step 2: Melt butter in a pan over medium heat.
+[2025-10-06 18:58:54] Step 3: Pour eggs into the pan and stir gently until curds form.
+[2025-10-06 18:59:03] Step 4: Remove from heat while slightly runny; season with salt and pepper.
+[2025-10-06 18:59:26] Cooking started in step mode.
+[2025-10-06 18:59:26] Step 1: Open the can of tuna and drain the liquid.
+[2025-10-06 18:59:34] Step 2: In a bowl, mix tuna with mayonnaise and diced celery.
+[2025-10-06 18:59:42] Step 3: Serve the salad with a side of croutons or a drizzle of mustard oil.
+[2025-10-06 18:59:50] Already at the last step.
+[2025-10-06 18:59:54] Clarification for step 3: Tip: Dice celery for a more even salad.
+[2025-10-06 19:00:00] Step 3: Serve the salad with a side of croutons or a drizzle of mustard oil.
+[2025-10-06 19:00:08] Clarification for step 3: Tip: Dice celery for a more even salad.
+[2025-10-06 19:03:57] Cooking started in step mode.
+[2025-10-06 19:03:57] Step 1: Bring a pot of salted water to a boil.
+[2025-10-06 19:04:25] Step 2: Add pasta and cook until tender, stirring occasionally.
+[2025-10-06 19:04:42] Step 2: Add pasta and cook until tender, stirring occasionally.
+[2025-10-06 19:04:50] Step 3: Drain pasta and return to the pot.
+[2025-10-06 19:05:11] Step 4: Pour tomato sauce over pasta and mix well before serving.
+[2025-10-06 19:05:19] Clarification for step 4: Tip: Top with grated cheese for extra flavor.
+[2025-10-06 19:05:24] Already at the last step.
+[2025-10-06 19:16:59] Cooking started in step mode.
+[2025-10-06 19:16:59] Step 1: Gather your choice of fruits, yogurt, and a liquid base.
+[2025-10-06 19:17:06] Clarification for step 1: Tip: Use frozen fruits for a thicker texture.
+[2025-10-06 19:17:12] Step 2: Place all ingredients into a blender.
+[2025-10-06 19:17:19] Clarification for step 2: Tip: Greek yogurt adds protein and creaminess.
+[2025-10-06 19:17:24] Step 2: Place all ingredients into a blender.
+[2025-10-06 19:17:30] Step 3: Blend until smooth and creamy.
+[2025-10-06 19:17:46] Step 4: Pour into a glass and enjoy immediately.
+[2025-10-06 19:17:53] Already at the last step.
+[2025-10-06 19:17:55] Clarification for step 4: Tip: Adjust the liquid amount to reach your desired consistency.
+[2025-10-20 15:52:45] Cooking started in step mode.

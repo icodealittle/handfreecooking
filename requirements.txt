@@ -1,0 +1,21 @@
+# tkinter
+# pillow
+# pyttsx3
+# SpeechRecognition
+# pygame
+# sounddevice
+# scipy
+# openai
+
+openai>=1.30.0
+sounddevice>=0.4.6
+pygame>=2.5.2
+scipy>=1.11.0
+numpy>=1.24.0
+pyttsx3>=2.90
+SpeechRecognition>=3.10.0
+noisereduce>=3.0.0
+soundfile>=0.12.1
+pillow>=10.0.0
+tk
+

@@ -1,8 +1,0 @@
-tk
-pillow
-pyttsx3
-SpeechRecognition
-pygame
-sounddevice
-scipy
-openai
